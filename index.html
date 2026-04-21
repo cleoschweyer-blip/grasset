@@ -1,3 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+<meta charset="UTF-8">
+<title>Qui veut aller chez Grasset ?</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap" rel="stylesheet">
+
+<style>
+body {
+    background-color: #0b1d3a;
+    color: #d4af37;
+    font-family: 'Playfair Display', serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+input {
+    background-color: #0b1d3a;
+    border: 1px solid #d4af37;
+    color: #d4af37;
+    padding: 8px;
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+button {
+    background-color: transparent;
+    border: 2px solid #d4af37;
+    color: #d4af37;
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #d4af37;
+    color: #0b1d3a;
+}
+
+#result {
+    margin-top: 30px;
+    font-size: 1.8em;
+    text-align: center;
+    width: 70%;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Qui veut aller chez Grasset ?</h1>
+
+<input id="userInput" placeholder="Entrez votre sujet (optionnel)" />
+
+<button onclick="generateTitle()">Proposez votre ouvrage</button>
+
+<div id="result"></div>
+
 <script>
 
 // ---- dictionnaire avec genre ----
@@ -14,16 +86,15 @@ const mots = [
 {w:"féminisme", g:"m"}
 ];
 
-// fragments remix
 const fragments = [
-"la fin du hasard",
-"le livre noir",
-"la fabrique de l'ennemi",
-"le temps de l'obsolescence",
-"la guerre des déchets",
-"le désir de tyrannie",
-"les sanglots",
-"la rafle",
+"la fin du",
+"le livre noir de",
+"la fabrique de",
+"le temps de",
+"la guerre de",
+"le désir de",
+"les sanglots de",
+"la rafle de",
 "le peuple des",
 "les chroniques"
 ];
@@ -33,28 +104,23 @@ const complements = [
 "enquête",
 "analyse",
 "chronique d’un déclin",
-"pour comprendre le monde",
+"pour comprendre le monde d'aujourd'hui",
 "manifeste",
 "contre notre temps"
 ];
 
-// ---- outils linguistiques ----
 function isVowel(c){
     return ["a","e","i","o","u","y","h"].includes(c);
 }
 
-function article(mot){
-    if(isVowel(mot[0])) return "l’";
-    return mot.g === "f" ? "la " : "le ";
+function article(m){
+    if(isVowel(m.w[0])) return "l’";
+    return m.g === "f" ? "la " : "le ";
 }
 
-function de(mot){
-    if(isVowel(mot[0])) return "de l’";
-    return mot.g === "f" ? "de la " : "du ";
-}
-
-function les(mot){
-    return "les ";
+function de(m){
+    if(isVowel(m.w[0])) return "de l’";
+    return m.g === "f" ? "de la " : "du ";
 }
 
 function capitalize(str){
@@ -62,18 +128,14 @@ function capitalize(str){
 }
 
 function rand(arr){
-    return arr[Math.floor(Math.random() * arr.length)];
+    return arr[Math.floor(Math.random()*arr.length)];
 }
 
-// ---- génération ----
 function generateTitle(){
 
     let input = document.getElementById("userInput").value.trim().toLowerCase();
 
-    let mot1 = input 
-        ? {w:input, g:"m"}   // fallback neutre
-        : rand(mots);
-
+    let mot1 = input ? {w: input, g:"m"} : rand(mots);
     let mot2 = rand(mots);
 
     let type = Math.floor(Math.random()*5);
@@ -81,29 +143,22 @@ function generateTitle(){
 
     switch(type){
 
-        // Le X de Y (correct)
         case 0:
-            titre = capitalize(
-                article(mot1) + mot1.w + " " + de(mot2) + mot2.w
-            );
+            titre = capitalize(article(mot1) + mot1.w + " " + de(mot2) + mot2.w);
             break;
 
-        // Les X de Y
         case 1:
             titre = "Les " + mot1.w + " " + de(mot2) + mot2.w;
             break;
 
-        // X : sous-titre
         case 2:
             titre = capitalize(article(mot1) + mot1.w) + " : " + rand(complements);
             break;
 
-        // remix
         case 3:
             titre = capitalize(rand(fragments)) + " " + mot1.w;
             break;
 
-        // X - sous-titre
         case 4:
             titre = capitalize(article(mot1) + mot1.w) + " - " + rand(complements);
             break;
@@ -113,3 +168,6 @@ function generateTitle(){
 }
 
 </script>
+
+</body>
+</html>
