@@ -34,9 +34,7 @@ h1 {
     transition: opacity 0.3s;
 }
 
-#result:hover {
-    opacity: 0.7;
-}
+#result:hover { opacity: 0.7; }
 
 .hint {
     margin-top: 20px;
@@ -49,58 +47,45 @@ h1 {
 <body>
 
 <h1>Qui veut aller chez Grasset ?</h1>
-
-<div id="result" onclick="generateTitle()">
-Cliquez
-</div>
-
+<div id="result" onclick="generateTitle()">Cliquez</div>
 <div class="hint">(clic = nouveau titre + copie)</div>
 
 <script>
 
-// ===== TITRES RÉELS =====
-const titresReference = [
-"Dernier inventaire avant liquidation",
-"La fin du hasard",
-"Esthétique du pôle nord",
-"Diderot ou le matérialisme enchanté",
-"Chroniques de Los Angeles",
-"A mon frère qui n'est pas mort",
-"Pirates de Somalie",
-"Le jour où l'histoire a recommencé",
-"Le livre noir de la télévision",
-"Les sanglots de l'homme blanc",
-"King-Kong théorie",
-"La rafle des notables",
-"Le temps de l'obsolescence humaine",
-"La guerre des déchets",
-"La fabrique de l'ennemi",
-"Le désir de tyrannie",
-"Le coran des lumières",
-"Le peuple des frileux",
-"Les champignons de l'apocalypse"
-];
-
-// ===== FRAGMENTS =====
-const fragmentsDebut = [
-"La fabrique de","Le désir de","La guerre de","Le temps de",
-"Le peuple des","Le livre noir de","La fin du","La mort de",
-"L’aventure de","Les sanglots de"
-];
-
-const fragmentsFin = [
-"l’histoire","la culture","le pouvoir","l’identité",
-"la France","le monde","l’écologie","la politique"
+// ===== MOTS ISSUS DES TITRES RÉELS =====
+const reservoir = [
+"inventaire","liquidation","hasard","pôle","nord","cardinal",
+"prophète","matérialisme","Los Angeles","Somalie","idéologie",
+"totalitaire","histoire","rêve","avenir","politiques","culturelles",
+"télévision","apocalypse","ennemi","tyrannie","lumières","frileux",
+"biologie","Darwin","Mendel","école","déchets","obsolescence"
 ];
 
 // ===== BASE =====
 const mots = [
-{w:"histoire", g:"f"}, {w:"mémoire", g:"f"}, {w:"identité", g:"f"},
-{w:"écologie", g:"f"}, {w:"politique", g:"f"}, {w:"culture", g:"f"},
-{w:"monde", g:"m"}, {w:"pouvoir", g:"m"}, {w:"temps", g:"m"},
-{w:"avenir", g:"m"}, {w:"déclin", g:"m"},
-{w:"wokisme", g:"m"}, {w:"post-sécularisme", g:"m"},
-{w:"féminisme", g:"m"}, {w:"sanglots", g:"pl"}
+{w:"histoire", g:"f"},
+{w:"mémoire", g:"f"},
+{w:"identité", g:"f"},
+{w:"écologie", g:"f"},
+{w:"politique", g:"f"},
+{w:"culture", g:"f"},
+{w:"sociologie", g:"f"},
+{w:"science", g:"f"},
+{w:"info-comm", g:"f"},
+
+{w:"monde", g:"m"},
+{w:"pouvoir", g:"m"},
+{w:"temps", g:"m"},
+{w:"avenir", g:"m"},
+{w:"déclin", g:"m"},
+{w:"wokisme", g:"m"},
+{w:"post-sécularisme", g:"m"},
+{w:"féminisme", g:"m"},
+{w:"communautarisme", g:"m"},
+{w:"fromage", g:"m"},
+
+{w:"SHS", g:"pl"},
+{w:"sanglots", g:"pl"}
 ];
 
 // ===== ABSURDE =====
@@ -123,6 +108,14 @@ const contemporain = [
 // ===== NOMS PROPRES =====
 const nomsPropres = [
 {w:"Macron", proper:true},
+{w:"Curtis Yarvin", proper:true},
+{w:"Bardella", proper:true},
+{w:"Marie-Paupiette", proper:true},
+{w:"Retailleau", proper:true},
+{w:"Léon XIV", proper:true},
+{w:"Trump", proper:true},
+{w:"Douglas Wilson", proper:true},
+{w:"Nathalie Heinich", proper:true},
 {w:"Sébastien Fath", proper:true}
 ];
 
@@ -145,125 +138,91 @@ function deDet(m){
     return m.g === "f" ? "de la " : "du ";
 }
 
-function rand(arr){
-    return arr[Math.floor(Math.random()*arr.length)];
-}
-
 function capitalize(s){
     return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-// ===== CLEAN =====
+function rand(arr){
+    return arr[Math.floor(Math.random()*arr.length)];
+}
+
+// ===== CLEAN STRICT =====
 function cleanTitle(str){
     return str
-        .replace(/\bde\s+de\b/g, "de")
-        .replace(/\bde\s+du\b/g, "du")
-        .replace(/\bde\s+des\b/g, "des")
-        .replace(/\bde\s+de la\b/g, "de la")
-        .replace(/\bde\s+de l[’']/g, "de l’")
-        .replace(/\ble ([aeiouyhàâéèêëîïôûù])/gi, "l’$1")
-        .replace(/\bla ([aeiouyhàâéèêëîïôûù])/gi, "l’$1")
-        .replace(/\s+/g, " ")
-        .replace(/l’\s+/g, "l’")
+        .replace(/\bde\s+du\b/g,"du")
+        .replace(/\bde\s+des\b/g,"des")
+        .replace(/\bde\s+de\b/g,"de")
+        .replace(/\bde\s+de la\b/g,"de la")
+        .replace(/\bde\s+de l[’']/g,"de l’")
+        .replace(/\ble ([aeiouyhàâéèêëîïôûù])/gi,"l’$1")
+        .replace(/\bla ([aeiouyhàâéèêëîïôûù])/gi,"l’$1")
+        .replace(/\s+/g," ")
         .trim();
 }
 
 // ===== PICK =====
 function pick(){
     let base = [...mots, ...contemporain, ...nomsPropres];
-    if(Math.random() < 0.5){
+
+    if(Math.random() < 0.6){
+        base.push({w:rand(reservoir), g:"m"});
+    }
+
+    if(Math.random() < 0.4){
         base = [...base, ...absurdes];
     }
+
     return rand(base);
 }
 
-// ===== REMIX =====
-function remixTitle(){
-    let m = pick();
-    let abs = rand(absurdes);
-
-    let type = Math.floor(Math.random()*4);
-
-    switch(type){
-        case 0:
-            return capitalize(rand(fragmentsDebut)) + " " + deDet(abs) + abs.w;
-        case 1:
-            return capitalize(rand(fragmentsDebut)) + " " + deDet(m) + m.w;
-        case 2:
-            return capitalize(rand(fragmentsDebut)) + " " + deDet(m) + m.w +
-                   " et " + deDet(abs) + abs.w;
-        case 3:
-            return capitalize(rand(fragmentsFin)) +
-                   " : enquête sur " + det(abs) + abs.w;
-    }
-}
-
-// ===== FILTRE =====
-function hasDuplicateWords(title){
-    let words = title.toLowerCase().split(/\s+/);
-    return new Set(words).size !== words.length;
-}
-
-// ===== MÉMOIRE =====
+// ===== GENERATION =====
 let lastType = -1;
 
-// ===== GENERATION =====
 function generateTitle(){
 
     let titre = "";
+    let tries = 0;
+    let type;
 
-    if(Math.random() < 0.25){
-        titre = cleanTitle(rand(titresReference));
-    }
-    else if(Math.random() < 0.5){
-        titre = cleanTitle(remixTitle());
-    }
-    else{
-
-        let tries = 0;
-        let type;
+    do{
+        let m1 = pick();
+        let m2 = pick();
+        let m3 = pick();
 
         do{
-            let m1 = pick();
-            let m2 = pick();
-            let m3 = pick();
+            type = Math.floor(Math.random()*4);
+        } while(type === lastType);
 
-            do {
-                type = Math.floor(Math.random()*4);
-            } while(type === lastType);
+        switch(type){
 
-            switch(type){
+            case 0:
+                titre = m1.w +
+                " : enquête sur " + det(m2) + m2.w +
+                " " + deDet(m3) + m3.w;
+                break;
 
-                case 0:
-                    titre = m1.w +
-                    " : enquête sur " + det(m2) + m2.w +
-                    " " + deDet(m3) + m3.w;
-                    break;
+            case 1:
+                titre = det(m1) + m1.w +
+                " et " + det(m2) + m2.w;
+                break;
 
-                case 1:
-                    let abs = rand(absurdes);
-                    titre = det(m1) + m1.w +
-                    " et " + det(abs) + abs.w;
-                    break;
+            case 2:
+                titre = "Le moment " + m1.w;
+                break;
 
-                case 2:
-                    titre = "Le moment " + m1.w;
-                    break;
+            case 3:
+                titre = m1.w +
+                " : pourquoi tout a changé";
+                break;
+        }
 
-                case 3:
-                    titre = m1.w +
-                    " : pourquoi tout a changé";
-                    break;
-            }
+        tries++;
 
-            tries++;
+    } while(new Set(titre.split(" ")).size !== titre.split(" ").length && tries < 10);
 
-        } while(hasDuplicateWords(titre) && tries < 10);
+    lastType = type;
 
-        lastType = type;
-
-        titre = cleanTitle(capitalize(titre));
-    }
+    titre = cleanTitle(capitalize(titre));
 
     document.getElementById("result").innerText = titre;
     navigator.clipboard.writeText(titre);
