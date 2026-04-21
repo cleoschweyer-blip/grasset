@@ -37,7 +37,7 @@ h1 {
 <body>
 
 <h1>Qui veut aller chez Grasset ?</h1>
-<div id="result" onclick="generateTitle()">Cliquez</div>
+<div id="result">Cliquez</div>
 
 <script>
 
@@ -151,7 +151,6 @@ function countProper(...items){
     return items.filter(x=>x.proper).length;
 }
 
-// 🔥 NOUVELLE RÈGLE
 function isBadProperCombo(m1, m2){
     return m1.proper && !m2.proper;
 }
@@ -178,7 +177,6 @@ function generateTitle(){
             type = Math.floor(Math.random()*4);
         } while(type===lastType);
 
-        // 🔥 sécurité ajoutée
         if(isBadProperCombo(m1, m2) && type === 0) continue;
 
         switch(type){
@@ -219,8 +217,15 @@ function generateTitle(){
     titre = clean(capitalize(titre));
 
     document.getElementById("result").innerText = titre;
-    navigator.clipboard.writeText(titre);
+
+    // copie sécurisée
+    try {
+        navigator.clipboard.writeText(titre);
+    } catch(e) {}
 }
+
+// ===== EVENT LISTENER (plus fiable que onclick) =====
+document.getElementById("result").addEventListener("click", generateTitle);
 
 </script>
 
