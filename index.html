@@ -81,18 +81,22 @@ function isVowel(c){
     return "aeiouyhàâéèêëîïôûù".includes(c.toLowerCase());
 }
 
-function det(m){
-    if(m.proper) return "";
-    if(m.g==="pl") return "les ";
-    if(isVowel(m.w[0])) return "l’";
-    return m.g==="f"?"la ":"le ";
-}
-
 function deDet(m){
+
     if(m.proper) return "de ";
-    if(m.g==="pl") return "des ";
+
+    // 🔥 sécurité pluriel prioritaire
+    if(m.g === "pl" || m.w.endsWith("s")) return "des ";
+
+    // élision
     if(isVowel(m.w[0])) return "de l’";
-    return m.g==="f"?"de la ":"du ";
+
+    // féminin
+    if(m.g === "f") return "de la ";
+
+    // masculin
+    return "du ";
+}
 }
 
 function rand(arr){
