@@ -47,13 +47,11 @@ const mots = [
 {w:"écologie", g:"f"}, {w:"politique", g:"f"}, {w:"culture", g:"f"},
 {w:"sociologie", g:"f"}, {w:"science", g:"f"}, {w:"info-comm", g:"f"},
 {w:"théorie", g:"f"},
-
 {w:"monde", g:"m"}, {w:"pouvoir", g:"m"}, {w:"temps", g:"m"},
 {w:"avenir", g:"m"}, {w:"déclin", g:"m"},
 {w:"wokisme", g:"m"}, {w:"post-sécularisme", g:"m"},
 {w:"féminisme", g:"m"}, {w:"communautarisme", g:"m"},
 {w:"fromage", g:"m"},
-
 {w:"SHS", g:"pl"}, {w:"sanglots", g:"pl"}
 ];
 
@@ -159,12 +157,20 @@ function isBadProperCombo(m1, m2){
 let lastType = -1;
 let lastMainWord = "";
 
-// ===== GENERATION =====
+// ===== GENERATION (FIX FINAL) =====
 function generateTitle(){
 
-    let titre, type, m1, m2, m3;
+    let titre = "";
+    let type, m1, m2, m3;
+    let attempts = 0;
 
-    do{
+    while(true){
+
+        attempts++;
+        if(attempts > 50){
+            titre = "La politique et le brocoli";
+            break;
+        }
 
         m1 = pick();
         m2 = pick();
@@ -205,11 +211,15 @@ function generateTitle(){
                 break;
         }
 
-    } while(
-        hasDuplicateWords(titre) ||
-        m1.w === lastMainWord ||
-        titre.length < 12
-    );
+        if(
+            titre &&
+            !hasDuplicateWords(titre) &&
+            m1.w !== lastMainWord &&
+            titre.length >= 12
+        ){
+            break;
+        }
+    }
 
     lastType = type;
     lastMainWord = m1.w;
@@ -218,13 +228,12 @@ function generateTitle(){
 
     document.getElementById("result").innerText = titre;
 
-    // copie sécurisée
     try {
         navigator.clipboard.writeText(titre);
     } catch(e) {}
 }
 
-// ===== EVENT LISTENER (plus fiable que onclick) =====
+// ===== EVENT =====
 document.getElementById("result").addEventListener("click", generateTitle);
 
 </script>
