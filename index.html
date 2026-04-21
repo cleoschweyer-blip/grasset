@@ -46,11 +46,14 @@ const mots = [
 {w:"histoire", g:"f"}, {w:"mémoire", g:"f"}, {w:"identité", g:"f"},
 {w:"écologie", g:"f"}, {w:"politique", g:"f"}, {w:"culture", g:"f"},
 {w:"sociologie", g:"f"}, {w:"science", g:"f"}, {w:"info-comm", g:"f"},
+{w:"théorie", g:"f"},
+
 {w:"monde", g:"m"}, {w:"pouvoir", g:"m"}, {w:"temps", g:"m"},
 {w:"avenir", g:"m"}, {w:"déclin", g:"m"},
 {w:"wokisme", g:"m"}, {w:"post-sécularisme", g:"m"},
 {w:"féminisme", g:"m"}, {w:"communautarisme", g:"m"},
 {w:"fromage", g:"m"},
+
 {w:"SHS", g:"pl"}, {w:"sanglots", g:"pl"}
 ];
 
@@ -87,7 +90,6 @@ function isVowel(c){
     return "aeiouyhàâéèêëîïôûù".includes(c.toLowerCase());
 }
 
-// 🔥 VERSION ROBUSTE
 function det(m){
     if(m.proper) return "";
     if(m.g==="pl" || m.w.endsWith("s")) return "les ";
@@ -149,6 +151,11 @@ function countProper(...items){
     return items.filter(x=>x.proper).length;
 }
 
+// 🔥 NOUVELLE RÈGLE
+function isBadProperCombo(m1, m2){
+    return m1.proper && !m2.proper;
+}
+
 // ===== MÉMOIRE =====
 let lastType = -1;
 let lastMainWord = "";
@@ -171,13 +178,16 @@ function generateTitle(){
             type = Math.floor(Math.random()*4);
         } while(type===lastType);
 
+        // 🔥 sécurité ajoutée
+        if(isBadProperCombo(m1, m2) && type === 0) continue;
+
         switch(type){
 
             case 0:
                 titre = m1.w +
                 " : enquête sur " + det(m2) + m2.w;
 
-                if(m2.w !== m3.w){
+                if(!m2.proper && m2.w !== m3.w){
                     titre += " " + deDet(m3) + m3.w;
                 }
                 break;
