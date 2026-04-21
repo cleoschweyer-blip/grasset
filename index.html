@@ -50,14 +50,14 @@ const mots = [
 {w:"avenir", g:"m"}, {w:"déclin", g:"m"},
 {w:"wokisme", g:"m"}, {w:"post-sécularisme", g:"m"},
 {w:"féminisme", g:"m"}, {w:"communautarisme", g:"m"},
-{w:"SHS", g:"pl"}, {w:"sanglots", g:"pl"}, {w:"théorie", g:"f"}
+{w:"fromage", g:"m"},
+{w:"SHS", g:"pl"}, {w:"sanglots", g:"pl"}
 ];
 
 const absurdes = [
 {w:"skateboard", g:"m"},
 {w:"brocoli", g:"m"},
 {w:"chaussette", g:"f"},
-{w:"fromage", g:"m"},
 {w:"chat", g:"m"}
 ];
 
@@ -68,12 +68,18 @@ const nomsPropres = [
 {w:"Curtis Yarvin", proper:true},
 {w:"Retailleau", proper:true},
 {w:"Nathalie Heinich", proper:true}
-{w:"King-Kong", proper:true}
 ];
 
 const reservoir = [
-"inventaire","liquidation","hasard","obsolescence",
-"idéologie","tyrannie","Lumières","frileux","anatomie"
+{w:"inventaire", g:"m"},
+{w:"liquidation", g:"f"},
+{w:"hasard", g:"m"},
+{w:"obsolescence", g:"f"},
+{w:"idéologie", g:"f"},
+{w:"tyrannie", g:"f"},
+{w:"lumières", g:"pl"},
+{w:"frileux", g:"pl"},
+{w:"biologie", g:"f"}
 ];
 
 // ===== OUTILS =====
@@ -81,22 +87,19 @@ function isVowel(c){
     return "aeiouyhàâéèêëîïôûù".includes(c.toLowerCase());
 }
 
-function deDet(m){
-
-    if(m.proper) return "de ";
-
-    // 🔥 sécurité pluriel prioritaire
-    if(m.g === "pl" || m.w.endsWith("s")) return "des ";
-
-    // élision
-    if(isVowel(m.w[0])) return "de l’";
-
-    // féminin
-    if(m.g === "f") return "de la ";
-
-    // masculin
-    return "du ";
+// 🔥 VERSION ROBUSTE
+function det(m){
+    if(m.proper) return "";
+    if(m.g==="pl" || m.w.endsWith("s")) return "les ";
+    if(isVowel(m.w[0])) return "l’";
+    return m.g==="f" ? "la " : "le ";
 }
+
+function deDet(m){
+    if(m.proper) return "de ";
+    if(m.g==="pl" || m.w.endsWith("s")) return "des ";
+    if(isVowel(m.w[0])) return "de l’";
+    return m.g==="f" ? "de la " : "du ";
 }
 
 function rand(arr){
@@ -107,30 +110,17 @@ function capitalize(s){
     return s.charAt(0).toUpperCase()+s.slice(1);
 }
 
-// ===== CLEAN ROBUSTE =====
+// ===== CLEAN =====
 function clean(str){
-
     return str
-
-        // contractions
         .replace(/\bde\s+du\b/g,"du")
         .replace(/\bde\s+des\b/g,"des")
         .replace(/\bde\s+de\b/g,"de")
-
-        // doublons
         .replace(/\bdu\s+du\b/g,"du")
         .replace(/\bdes\s+des\b/g,"des")
-        .replace(/\ble\s+le\b/g,"le")
-        .replace(/\bla\s+la\b/g,"la")
-
-        // élisions
         .replace(/\ble ([aeiouyhàâéèêëîïôûù])/gi,"l’$1")
         .replace(/\bla ([aeiouyhàâéèêëîïôûù])/gi,"l’$1")
-
-        // espaces
         .replace(/\s+/g," ")
-        .replace(/l’\s+/g,"l’")
-
         .trim();
 }
 
@@ -139,7 +129,7 @@ function pick(){
     let pool = [...mots, ...nomsPropres];
 
     if(Math.random()<0.5){
-        pool.push({w:rand(reservoir), g:"m"});
+        pool.push(rand(reservoir));
     }
 
     if(Math.random()<0.4){
@@ -174,11 +164,9 @@ function generateTitle(){
         m2 = pick();
         m3 = pick();
 
-        // filtres de base
         if(countProper(m1,m2,m3)>1) continue;
         if(m1.w===m2.w || m2.w===m3.w) continue;
 
-        // type différent
         do{
             type = Math.floor(Math.random()*4);
         } while(type===lastType);
