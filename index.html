@@ -1,0 +1,115 @@
+<script>
+
+// ---- dictionnaire avec genre ----
+const mots = [
+{w:"hasard", g:"m"}, {w:"histoire", g:"f"}, {w:"biologie", g:"f"},
+{w:"école", g:"f"}, {w:"télévision", g:"f"}, {w:"ennemi", g:"m"},
+{w:"désir", g:"m"}, {w:"tyrannie", g:"f"}, {w:"avenir", g:"m"},
+{w:"culture", g:"f"}, {w:"apocalypse", g:"f"}, {w:"réalité", g:"f"},
+{w:"politique", g:"f"}, {w:"religion", g:"f"}, {w:"peuple", g:"m"},
+{w:"monde", g:"m"}, {w:"france", g:"f"}, {w:"travail", g:"m"},
+{w:"guerre", g:"f"}, {w:"mort", g:"f"}, {w:"temps", g:"m"},
+{w:"corps", g:"m"}, {w:"vérité", g:"f"}, {w:"pouvoir", g:"m"},
+{w:"identité", g:"f"}, {w:"écologie", g:"f"}, {w:"déclin", g:"m"},
+{w:"féminisme", g:"m"}
+];
+
+// fragments remix
+const fragments = [
+"la fin du hasard",
+"le livre noir",
+"la fabrique de l'ennemi",
+"le temps de l'obsolescence",
+"la guerre des déchets",
+"le désir de tyrannie",
+"les sanglots",
+"la rafle",
+"le peuple des",
+"les chroniques"
+];
+
+const complements = [
+"essai sur notre époque",
+"enquête",
+"analyse",
+"chronique d’un déclin",
+"pour comprendre le monde",
+"manifeste",
+"contre notre temps"
+];
+
+// ---- outils linguistiques ----
+function isVowel(c){
+    return ["a","e","i","o","u","y","h"].includes(c);
+}
+
+function article(mot){
+    if(isVowel(mot[0])) return "l’";
+    return mot.g === "f" ? "la " : "le ";
+}
+
+function de(mot){
+    if(isVowel(mot[0])) return "de l’";
+    return mot.g === "f" ? "de la " : "du ";
+}
+
+function les(mot){
+    return "les ";
+}
+
+function capitalize(str){
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function rand(arr){
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// ---- génération ----
+function generateTitle(){
+
+    let input = document.getElementById("userInput").value.trim().toLowerCase();
+
+    let mot1 = input 
+        ? {w:input, g:"m"}   // fallback neutre
+        : rand(mots);
+
+    let mot2 = rand(mots);
+
+    let type = Math.floor(Math.random()*5);
+    let titre = "";
+
+    switch(type){
+
+        // Le X de Y (correct)
+        case 0:
+            titre = capitalize(
+                article(mot1) + mot1.w + " " + de(mot2) + mot2.w
+            );
+            break;
+
+        // Les X de Y
+        case 1:
+            titre = "Les " + mot1.w + " " + de(mot2) + mot2.w;
+            break;
+
+        // X : sous-titre
+        case 2:
+            titre = capitalize(article(mot1) + mot1.w) + " : " + rand(complements);
+            break;
+
+        // remix
+        case 3:
+            titre = capitalize(rand(fragments)) + " " + mot1.w;
+            break;
+
+        // X - sous-titre
+        case 4:
+            titre = capitalize(article(mot1) + mot1.w) + " - " + rand(complements);
+            break;
+    }
+
+    document.getElementById("result").innerText = titre;
+}
+
+</script>
