@@ -41,15 +41,16 @@ h1 {
 
 <script>
 
-// ===== BASE =====
+// ===== LEXIQUE =====
 const mots = [
 {w:"histoire", g:"f"}, {w:"mémoire", g:"f"}, {w:"identité", g:"f"},
 {w:"écologie", g:"f"}, {w:"politique", g:"f"}, {w:"culture", g:"f"},
 {w:"sociologie", g:"f"}, {w:"science", g:"f"}, {w:"info-comm", g:"f"},
 {w:"monde", g:"m"}, {w:"pouvoir", g:"m"}, {w:"temps", g:"m"},
-{w:"avenir", g:"m"}, {w:"déclin", g:"m"}, {w:"wokisme", g:"m"},
-{w:"post-sécularisme", g:"m"}, {w:"féminisme", g:"m"},
-{w:"communautarisme", g:"m"}, {w:"fromage", g:"m"},
+{w:"avenir", g:"m"}, {w:"déclin", g:"m"},
+{w:"wokisme", g:"m"}, {w:"post-sécularisme", g:"m"},
+{w:"féminisme", g:"m"}, {w:"communautarisme", g:"m"},
+{w:"fromage", g:"m"},
 {w:"SHS", g:"pl"}, {w:"sanglots", g:"pl"}
 ];
 
@@ -101,15 +102,30 @@ function capitalize(s){
     return s.charAt(0).toUpperCase()+s.slice(1);
 }
 
-// ===== CLEAN =====
+// ===== CLEAN ROBUSTE =====
 function clean(str){
+
     return str
-        .replace(/\bde du\b/g,"du")
-        .replace(/\bde des\b/g,"des")
-        .replace(/\bde de\b/g,"de")
+
+        // contractions
+        .replace(/\bde\s+du\b/g,"du")
+        .replace(/\bde\s+des\b/g,"des")
+        .replace(/\bde\s+de\b/g,"de")
+
+        // doublons
+        .replace(/\bdu\s+du\b/g,"du")
+        .replace(/\bdes\s+des\b/g,"des")
+        .replace(/\ble\s+le\b/g,"le")
+        .replace(/\bla\s+la\b/g,"la")
+
+        // élisions
         .replace(/\ble ([aeiouyhàâéèêëîïôûù])/gi,"l’$1")
         .replace(/\bla ([aeiouyhàâéèêëîïôûù])/gi,"l’$1")
+
+        // espaces
         .replace(/\s+/g," ")
+        .replace(/l’\s+/g,"l’")
+
         .trim();
 }
 
@@ -134,9 +150,8 @@ function hasDuplicateWords(t){
     return new Set(w).size !== w.length;
 }
 
-// 👉 NOUVEAU : max 1 nom propre
 function countProper(...items){
-    return items.filter(x => x.proper).length;
+    return items.filter(x=>x.proper).length;
 }
 
 // ===== MÉMOIRE =====
@@ -154,19 +169,24 @@ function generateTitle(){
         m2 = pick();
         m3 = pick();
 
-        // 🔥 filtre noms propres
-        if(countProper(m1, m2, m3) > 1) continue;
+        // filtres de base
+        if(countProper(m1,m2,m3)>1) continue;
+        if(m1.w===m2.w || m2.w===m3.w) continue;
 
+        // type différent
         do{
             type = Math.floor(Math.random()*4);
-        } while(type === lastType);
+        } while(type===lastType);
 
         switch(type){
 
             case 0:
                 titre = m1.w +
-                " : enquête sur " + det(m2) + m2.w +
-                " " + deDet(m3) + m3.w;
+                " : enquête sur " + det(m2) + m2.w;
+
+                if(m2.w !== m3.w){
+                    titre += " " + deDet(m3) + m3.w;
+                }
                 break;
 
             case 1:
@@ -186,7 +206,8 @@ function generateTitle(){
 
     } while(
         hasDuplicateWords(titre) ||
-        m1.w === lastMainWord
+        m1.w === lastMainWord ||
+        titre.length < 12
     );
 
     lastType = type;
