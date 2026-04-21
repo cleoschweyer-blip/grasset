@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
 <meta charset="UTF-8">
 <title>Qui veut aller chez Grasset ?</title>
@@ -20,29 +19,15 @@ body {
     margin: 0;
 }
 
-h1 {
-    font-size: 2.5em;
-    margin-bottom: 20px;
-}
-
-input {
-    background-color: #0b1d3a;
-    border: 1px solid #d4af37;
-    color: #d4af37;
-    padding: 8px;
-    font-size: 1.1em;
-    margin-bottom: 15px;
-    text-align: center;
-}
+h1 { font-size: 2.5em; margin-bottom: 30px; }
 
 button {
-    background-color: transparent;
     border: 2px solid #d4af37;
+    background: none;
     color: #d4af37;
-    padding: 10px 20px;
-    margin: 10px;
-    font-size: 1.2em;
+    padding: 12px 24px;
     cursor: pointer;
+    font-size: 1.2em;
 }
 
 button:hover {
@@ -51,20 +36,17 @@ button:hover {
 }
 
 #result {
-    margin-top: 30px;
+    margin-top: 40px;
     font-size: 1.8em;
     text-align: center;
     width: 70%;
 }
 </style>
-
 </head>
 
 <body>
 
 <h1>Qui veut aller chez Grasset ?</h1>
-
-<input id="userInput" placeholder="Entrez votre sujet (optionnel)" />
 
 <button onclick="generateTitle()">Proposez votre ouvrage</button>
 
@@ -72,53 +54,72 @@ button:hover {
 
 <script>
 
-// ---- dictionnaire avec genre ----
+// ====== LEXIQUE ======
 const mots = [
-{w:"hasard", g:"m"}, {w:"histoire", g:"f"}, {w:"biologie", g:"f"},
-{w:"école", g:"f"}, {w:"télévision", g:"f"}, {w:"ennemi", g:"m"},
-{w:"désir", g:"m"}, {w:"tyrannie", g:"f"}, {w:"avenir", g:"m"},
-{w:"culture", g:"f"}, {w:"apocalypse", g:"f"}, {w:"réalité", g:"f"},
-{w:"politique", g:"f"}, {w:"religion", g:"f"}, {w:"peuple", g:"m"},
-{w:"monde", g:"m"}, {w:"france", g:"f"}, {w:"travail", g:"m"},
-{w:"guerre", g:"f"}, {w:"mort", g:"f"}, {w:"temps", g:"m"},
-{w:"corps", g:"m"}, {w:"vérité", g:"f"}, {w:"pouvoir", g:"m"},
-{w:"identité", g:"f"}, {w:"écologie", g:"f"}, {w:"déclin", g:"m"},
-{w:"féminisme", g:"m"}
+{w:"histoire", g:"f"}, {w:"mémoire", g:"f"}, {w:"identité", g:"f"},
+{w:"écologie", g:"f"}, {w:"politique", g:"f"}, {w:"culture", g:"f"},
+{w:"France", g:"f"}, {w:"école", g:"f"}, {w:"religion", g:"f"},
+{w:"monde", g:"m"}, {w:"pouvoir", g:"m"}, {w:"corps", g:"m"},
+{w:"temps", g:"m"}, {w:"avenir", g:"m"}, {w:"déclin", g:"m"},
+{w:"capitalisme", g:"m"}, {w:"désir", g:"m"}
 ];
 
-const fragments = [
-"la fin du",
-"le livre noir de",
-"la fabrique de",
-"le temps de",
-"la guerre de",
-"le désir de",
-"les sanglots de",
-"la rafle de",
-"le peuple des",
-"les chroniques"
+// noms propres (sans article)
+const nomsPropres = [
+{w:"Macron", g:"m", proper:true},
+{w:"Musk", g:"m", proper:true},
+{w:"Trump", g:"m", proper:true},
+{w:"Netflix", g:"m", proper:true},
+{w:"TikTok", g:"m", proper:true},
+{w:"Sébastien Fath", g:"m", proper:true}
 ];
 
-const complements = [
-"essai sur notre époque",
-"enquête",
-"analyse",
-"chronique d’un déclin",
-"pour comprendre le monde d'aujourd'hui",
-"manifeste",
-"contre notre temps"
+// légumes + expression
+const legumes = [
+{w:"carotte", g:"f"}, {w:"poireau", g:"m"}, {w:"courgette", g:"f"},
+{w:"brocoli", g:"m"}, {w:"aubergine", g:"f"},
+{w:"graines de tournesol", g:"f"}
 ];
 
+// expressions fixes
+const expressions = [
+{w:"le post-sécularisme", fixed:true}
+];
+
+const politique = [
+{w:"gauche", g:"f"}, {w:"droite", g:"f"}
+];
+
+const critiques = [
+{w:"crise", g:"f"}, {w:"imposture", g:"f"}, {w:"illusion", g:"f"},
+{w:"fatigue", g:"f"}, {w:"dérive", g:"f"}
+];
+
+const adjectifs = ["moderne","invisible","radical","ordinaire","oublié"];
+const lieux = ["Paris","l’Europe","le numérique","les réseaux"];
+
+const registres = [
+"rapport sur","notes sur","réflexions sur",
+"tentative de comprendre","brève histoire de"
+];
+
+// ====== OUTILS ======
 function isVowel(c){
-    return ["a","e","i","o","u","y","h"].includes(c);
+    return ["a","e","i","o","u","y","h","é","è","ê"].includes(c.toLowerCase());
 }
 
-function article(m){
+// gestion déterminant
+function det(m){
+    if(m.proper) return "";
+    if(m.fixed) return "";
     if(isVowel(m.w[0])) return "l’";
     return m.g === "f" ? "la " : "le ";
 }
 
-function de(m){
+// gestion de + article
+function deDet(m){
+    if(m.proper) return "de ";
+    if(m.fixed) return "de ";
     if(isVowel(m.w[0])) return "de l’";
     return m.g === "f" ? "de la " : "du ";
 }
@@ -131,38 +132,116 @@ function rand(arr){
     return arr[Math.floor(Math.random()*arr.length)];
 }
 
+// pool global
+function fullPool(){
+    return [...mots, ...nomsPropres, ...legumes, ...politique, ...expressions];
+}
+
+// éviter doublons
+function pickDistinct(){
+    let pool = fullPool();
+    let shuffled = pool.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0,3);
+}
+
+// ====== FILTRE ======
+function hasDuplicateWords(title){
+    let words = title
+        .toLowerCase()
+        .replace(/[’']/g," ")
+        .replace(/[^a-zàâéèêëîïôûùç\s]/g,"")
+        .split(/\s+/);
+
+    let seen = new Set();
+
+    for(let w of words){
+        if(w.length < 3) continue;
+        if(seen.has(w)) return true;
+        seen.add(w);
+    }
+    return false;
+}
+
+// ====== GÉNÉRATION ======
 function generateTitle(){
 
-    let input = document.getElementById("userInput").value.trim().toLowerCase();
-
-    let mot1 = input ? {w: input, g:"m"} : rand(mots);
-    let mot2 = rand(mots);
-
-    let type = Math.floor(Math.random()*5);
     let titre = "";
+    let attempts = 0;
 
-    switch(type){
+    do {
 
-        case 0:
-            titre = capitalize(article(mot1) + mot1.w + " " + de(mot2) + mot2.w);
-            break;
+        let [m1, m2, m3] = pickDistinct();
+        let critique = rand(critiques);
 
-        case 1:
-            titre = "Les " + mot1.w + " " + de(mot2) + mot2.w;
-            break;
+        let type = Math.floor(Math.random()*12);
 
-        case 2:
-            titre = capitalize(article(mot1) + mot1.w) + " : " + rand(complements);
-            break;
+        switch(type){
 
-        case 3:
-            titre = capitalize(rand(fragments)) + " " + mot1.w;
-            break;
+            case 0:
+                titre = capitalize(m1.w) +
+                " : enquête sur " + det(m2) + m2.w +
+                " " + deDet(m3) + m3.w;
+                break;
 
-        case 4:
-            titre = capitalize(article(mot1) + mot1.w) + " - " + rand(complements);
-            break;
-    }
+            case 1:
+                titre = "Chroniques " + deDet(m1) + m1.w;
+                break;
+
+            case 2:
+                titre = capitalize(det(m1) + m1.w) +
+                " : essai sur " + det(m2) + m2.w +
+                " et " + det(critique) + critique.w;
+                break;
+
+            case 3:
+                titre = capitalize(det(m1) + m1.w) +
+                " et " + det(m2) + m2.w;
+                break;
+
+            case 4:
+                titre = capitalize(det(critique) + critique.w) +
+                " " + deDet(m1) + m1.w;
+                break;
+
+            case 5:
+                titre = capitalize(m1.w) +
+                " : enquête sur " + det(m2) + m2.w +
+                " et " + det(critique) + critique.w;
+                break;
+
+            case 6:
+                titre = capitalize(m1.w) + " ou " + m2.w;
+                break;
+
+            case 7:
+                titre = capitalize(det(m1) + m1.w) +
+                " contre " + det(m2) + m2.w;
+                break;
+
+            case 8:
+                titre = capitalize(m1.w) +
+                " : une histoire " + deDet(m2) + m2.w;
+                break;
+
+            case 9:
+                titre = capitalize(det(m1) + m1.w) +
+                " face à " + det(m2) + m2.w;
+                break;
+
+            case 10:
+                titre = capitalize(rand(registres)) + " " +
+                det(m1) + m1.w;
+                break;
+
+            case 11:
+                titre = capitalize(det(m1) + m1.w) +
+                " " + rand(adjectifs);
+                break;
+        }
+
+        attempts++;
+
+    } while(hasDuplicateWords(titre) && attempts < 10);
 
     document.getElementById("result").innerText = titre;
 }
