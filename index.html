@@ -23,7 +23,6 @@ h1 {
     font-family: 'Dancing Script', cursive;
     font-size: 2.8em;
     margin-bottom: 60px;
-    letter-spacing: 1px;
 }
 
 #result {
@@ -31,15 +30,6 @@ h1 {
     max-width: 700px;
     text-align: center;
     cursor: pointer;
-    transition: opacity 0.3s;
-}
-
-#result:hover { opacity: 0.7; }
-
-.hint {
-    margin-top: 20px;
-    font-size: 0.8em;
-    opacity: 0.5;
 }
 </style>
 </head>
@@ -48,75 +38,40 @@ h1 {
 
 <h1>Qui veut aller chez Grasset ?</h1>
 <div id="result" onclick="generateTitle()">Cliquez</div>
-<div class="hint">(clic = nouveau titre + copie)</div>
 
 <script>
 
-// ===== MOTS ISSUS DES TITRES RÉELS =====
-const reservoir = [
-"inventaire","liquidation","hasard","pôle","nord","cardinal",
-"prophète","matérialisme","Los Angeles","Somalie","idéologie",
-"totalitaire","histoire","rêve","avenir","politiques","culturelles",
-"télévision","apocalypse","ennemi","tyrannie","lumières","frileux",
-"biologie","Darwin","Mendel","école","déchets","obsolescence"
-];
-
 // ===== BASE =====
 const mots = [
-{w:"histoire", g:"f"},
-{w:"mémoire", g:"f"},
-{w:"identité", g:"f"},
-{w:"écologie", g:"f"},
-{w:"politique", g:"f"},
-{w:"culture", g:"f"},
-{w:"sociologie", g:"f"},
-{w:"science", g:"f"},
-{w:"info-comm", g:"f"},
-
-{w:"monde", g:"m"},
-{w:"pouvoir", g:"m"},
-{w:"temps", g:"m"},
-{w:"avenir", g:"m"},
-{w:"déclin", g:"m"},
-{w:"wokisme", g:"m"},
-{w:"post-sécularisme", g:"m"},
-{w:"féminisme", g:"m"},
-{w:"communautarisme", g:"m"},
-{w:"fromage", g:"m"},
-
-{w:"SHS", g:"pl"},
-{w:"sanglots", g:"pl"}
+{w:"histoire", g:"f"}, {w:"mémoire", g:"f"}, {w:"identité", g:"f"},
+{w:"écologie", g:"f"}, {w:"politique", g:"f"}, {w:"culture", g:"f"},
+{w:"sociologie", g:"f"}, {w:"science", g:"f"}, {w:"info-comm", g:"f"},
+{w:"monde", g:"m"}, {w:"pouvoir", g:"m"}, {w:"temps", g:"m"},
+{w:"avenir", g:"m"}, {w:"déclin", g:"m"}, {w:"wokisme", g:"m"},
+{w:"post-sécularisme", g:"m"}, {w:"féminisme", g:"m"},
+{w:"communautarisme", g:"m"}, {w:"fromage", g:"m"},
+{w:"SHS", g:"pl"}, {w:"sanglots", g:"pl"}
 ];
 
-// ===== ABSURDE =====
 const absurdes = [
 {w:"skateboard", g:"m"},
 {w:"brocoli", g:"m"},
-{w:"graines de tournesol", g:"pl"},
 {w:"chaussette", g:"f"},
-{w:"chat", g:"m"},
-{w:"sieste", g:"f"}
+{w:"chat", g:"m"}
 ];
 
-// ===== CONTEMPORAIN =====
-const contemporain = [
-{w:"algorithme", g:"m"},
-{w:"réseaux sociaux", g:"pl"},
-{w:"intelligence artificielle", g:"f"}
-];
-
-// ===== NOMS PROPRES =====
 const nomsPropres = [
 {w:"Macron", proper:true},
-{w:"Curtis Yarvin", proper:true},
 {w:"Bardella", proper:true},
-{w:"Marie-Paupiette", proper:true},
-{w:"Retailleau", proper:true},
-{w:"Léon XIV", proper:true},
 {w:"Trump", proper:true},
-{w:"Douglas Wilson", proper:true},
-{w:"Nathalie Heinich", proper:true},
-{w:"Sébastien Fath", proper:true}
+{w:"Curtis Yarvin", proper:true},
+{w:"Retailleau", proper:true},
+{w:"Nathalie Heinich", proper:true}
+];
+
+const reservoir = [
+"inventaire","liquidation","hasard","obsolescence",
+"idéologie","tyrannie","lumières","frileux","biologie"
 ];
 
 // ===== OUTILS =====
@@ -126,34 +81,32 @@ function isVowel(c){
 
 function det(m){
     if(m.proper) return "";
-    if(m.g === "pl") return "les ";
+    if(m.g==="pl") return "les ";
     if(isVowel(m.w[0])) return "l’";
-    return m.g === "f" ? "la " : "le ";
+    return m.g==="f"?"la ":"le ";
 }
 
 function deDet(m){
     if(m.proper) return "de ";
-    if(m.g === "pl") return "des ";
+    if(m.g==="pl") return "des ";
     if(isVowel(m.w[0])) return "de l’";
-    return m.g === "f" ? "de la " : "du ";
-}
-
-function capitalize(s){
-    return s.charAt(0).toUpperCase() + s.slice(1);
+    return m.g==="f"?"de la ":"du ";
 }
 
 function rand(arr){
     return arr[Math.floor(Math.random()*arr.length)];
 }
 
-// ===== CLEAN STRICT =====
-function cleanTitle(str){
+function capitalize(s){
+    return s.charAt(0).toUpperCase()+s.slice(1);
+}
+
+// ===== CLEAN =====
+function clean(str){
     return str
-        .replace(/\bde\s+du\b/g,"du")
-        .replace(/\bde\s+des\b/g,"des")
-        .replace(/\bde\s+de\b/g,"de")
-        .replace(/\bde\s+de la\b/g,"de la")
-        .replace(/\bde\s+de l[’']/g,"de l’")
+        .replace(/\bde du\b/g,"du")
+        .replace(/\bde des\b/g,"des")
+        .replace(/\bde de\b/g,"de")
         .replace(/\ble ([aeiouyhàâéèêëîïôûù])/gi,"l’$1")
         .replace(/\bla ([aeiouyhàâéèêëîïôûù])/gi,"l’$1")
         .replace(/\s+/g," ")
@@ -162,32 +115,47 @@ function cleanTitle(str){
 
 // ===== PICK =====
 function pick(){
-    let base = [...mots, ...contemporain, ...nomsPropres];
+    let pool = [...mots, ...nomsPropres];
 
-    if(Math.random() < 0.6){
-        base.push({w:rand(reservoir), g:"m"});
+    if(Math.random()<0.5){
+        pool.push({w:rand(reservoir), g:"m"});
     }
 
-    if(Math.random() < 0.4){
-        base = [...base, ...absurdes];
+    if(Math.random()<0.4){
+        pool = [...pool, ...absurdes];
     }
 
-    return rand(base);
+    return rand(pool);
 }
 
-// ===== GENERATION =====
-let lastType = -1;
+// ===== FILTRES =====
+function hasDuplicateWords(t){
+    let w = t.toLowerCase().split(/\s+/);
+    return new Set(w).size !== w.length;
+}
 
+// 👉 NOUVEAU : max 1 nom propre
+function countProper(...items){
+    return items.filter(x => x.proper).length;
+}
+
+// ===== MÉMOIRE =====
+let lastType = -1;
+let lastMainWord = "";
+
+// ===== GENERATION =====
 function generateTitle(){
 
-    let titre = "";
-    let tries = 0;
-    let type;
+    let titre, type, m1, m2, m3;
 
     do{
-        let m1 = pick();
-        let m2 = pick();
-        let m3 = pick();
+
+        m1 = pick();
+        m2 = pick();
+        m3 = pick();
+
+        // 🔥 filtre noms propres
+        if(countProper(m1, m2, m3) > 1) continue;
 
         do{
             type = Math.floor(Math.random()*4);
@@ -216,13 +184,15 @@ function generateTitle(){
                 break;
         }
 
-        tries++;
-
-    } while(new Set(titre.split(" ")).size !== titre.split(" ").length && tries < 10);
+    } while(
+        hasDuplicateWords(titre) ||
+        m1.w === lastMainWord
+    );
 
     lastType = type;
+    lastMainWord = m1.w;
 
-    titre = cleanTitle(capitalize(titre));
+    titre = clean(capitalize(titre));
 
     document.getElementById("result").innerText = titre;
     navigator.clipboard.writeText(titre);
