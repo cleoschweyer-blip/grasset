@@ -17,24 +17,24 @@ body {
     justify-content: center;
     height: 100vh;
     margin: 0;
+    text-align: center;
 }
 
-h1 { font-size: 2.5em; margin-bottom: 30px; }
-
-button {
-    border: 2px solid #d4af37;
-    background: none;
-    color: #d4af37;
-    padding: 12px 24px;
-    cursor: pointer;
-    font-size: 1.2em;
+h1 {
+    font-size: 2.2em;
+    margin-bottom: 40px;
+    font-weight: normal;
 }
 
 #result {
-    margin-top: 40px;
-    font-size: 1.8em;
-    text-align: center;
-    width: 70%;
+    font-size: 1.9em;
+    max-width: 700px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+#result:hover {
+    opacity: 0.7;
 }
 </style>
 </head>
@@ -42,51 +42,38 @@ button {
 <body>
 
 <h1>Qui veut aller chez Grasset ?</h1>
-<button onclick="generateTitle()">Proposez votre ouvrage</button>
-<div id="result"></div>
+
+<div id="result" onclick="generateTitle()">
+Cliquez ici
+</div>
 
 <script>
 
 // ===== LEXIQUE =====
 const mots = [
-{w:"histoire", g:"f"},
-{w:"mémoire", g:"f"},
-{w:"identité", g:"f"},
-{w:"écologie", g:"f"},
-{w:"politique", g:"f"},
-{w:"culture", g:"f"},
-{w:"monde", g:"m"},
-{w:"pouvoir", g:"m"},
-{w:"temps", g:"m"},
-{w:"avenir", g:"m"},
-{w:"déclin", g:"m"},
-{w:"wokisme", g:"m"},
-{w:"post-sécularisme", g:"m"},
-{w:"féminisme", g:"m"},
-{w:"sanglots", g:"pl"}
+{w:"histoire", g:"f"}, {w:"mémoire", g:"f"}, {w:"identité", g:"f"},
+{w:"écologie", g:"f"}, {w:"politique", g:"f"}, {w:"culture", g:"f"},
+{w:"monde", g:"m"}, {w:"pouvoir", g:"m"}, {w:"temps", g:"m"},
+{w:"avenir", g:"m"}, {w:"déclin", g:"m"},
+{w:"wokisme", g:"m"}, {w:"post-sécularisme", g:"m"},
+{w:"féminisme", g:"m"}, {w:"sanglots", g:"pl"}
 ];
 
-// contemporain
 const contemporain = [
 {w:"smartphone", g:"m"},
 {w:"algorithme", g:"m"},
-{w:"influenceur", g:"m"},
 {w:"réseaux sociaux", g:"pl"},
-{w:"streaming", g:"m"},
-{w:"plateforme", g:"f"},
 {w:"intelligence artificielle", g:"f"},
 {w:"skateboard", g:"m"}
 ];
 
-// noms propres
 const nomsPropres = [
 {w:"Macron", proper:true},
 {w:"Musk", proper:true},
 {w:"Sébastien Fath", proper:true}
 ];
 
-// objets absurdes
-const legumes = [
+const objets = [
 {w:"carotte", g:"f"},
 {w:"brocoli", g:"m"},
 {w:"graines de tournesol", g:"pl"}
@@ -130,15 +117,8 @@ function rand(arr){
     return arr[Math.floor(Math.random()*arr.length)];
 }
 
-// pool global
 function fullPool(){
-    return [
-        ...mots,
-        ...contemporain,
-        ...nomsPropres,
-        ...legumes,
-        ...politique
-    ];
+    return [...mots, ...contemporain, ...nomsPropres, ...objets, ...politique];
 }
 
 function pickDistinct(){
@@ -151,17 +131,24 @@ function hasDuplicateWords(title){
     return new Set(words).size !== words.length;
 }
 
+// ===== MEMOIRE DE STRUCTURE =====
+let lastType = -1;
+
 // ===== GENERATION =====
 function generateTitle(){
 
     let titre = "";
     let tries = 0;
+    let type;
 
     do{
         let [m1,m2,m3] = pickDistinct();
         let crit = rand(critiques);
 
-        let type = Math.floor(Math.random()*7);
+        // éviter répétition de structure
+        do {
+            type = Math.floor(Math.random()*6);
+        } while(type === lastType);
 
         switch(type){
 
@@ -187,18 +174,12 @@ function generateTitle(){
                 break;
 
             case 4:
-                titre = capitalize(m1.w) +
-                " : une histoire " + deDet(m2) + m2.w;
-                break;
-
-            // ===== NOUVEAU : FORMAT REALISTE =====
-            case 5:
                 titre = "Le moment " + m1.w;
                 break;
 
-            case 6:
+            case 5:
                 titre = capitalize(m1.w) +
-                " : le moment " + m2.w;
+                " : une histoire " + deDet(m2) + m2.w;
                 break;
         }
 
@@ -206,7 +187,12 @@ function generateTitle(){
 
     } while(hasDuplicateWords(titre) && tries < 10);
 
+    lastType = type;
+
     document.getElementById("result").innerText = titre;
+
+    // copie automatique
+    navigator.clipboard.writeText(titre);
 }
 
 </script>
